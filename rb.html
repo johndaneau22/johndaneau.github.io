@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<script src='https://d3js.org/d3.v5.min.js'></script>
+<style>
+    circle {
+        fill: lightblue;
+        stroke: black;
+    }
+
+    div.tooltip {
+        position: absolute;
+        text-align: center;
+        width: max-content;
+        height: max-content;
+        padding: 4px;
+        font: 12px sans-serif;
+        background: lightsteelblue;
+        border: 0px;
+        border-radius: 8px;
+        pointer-events: none;
+    }
+</style>
+
+<body onload='init()'>
+    <h1>Running Back Chart</h1>
+    <svg width=500 height=500>
+    </svg>
+    <script>
+        async function init() {
+
+            const data = await d3.csv('https://johndaneau22.github.io/johndaneau.github.io/2022NFLFantData.csv');
+
+            var x = d3.scaleLinear()
+                .domain([70, 350])
+                .range([0, 450]);
+
+            var y = d3.scaleLinear()
+                .domain([80, 380])
+                .range([450, 0]);
+
+            var div = d3.select("body").append("div")
+                .attr("class", "tooltip")
+                .style("opacity", 0);
+
+            d3.select('svg').append('g').attr('transform', 'translate(50,50)')
+                .selectAll('circle')
+                .data(data)
+                .enter()
+                .append('circle').filter(function (d) { return (d.FantPos == 'RB' && +d.PosRank < 50)})
+                .attr('cx', function (d) { return x(+d.Att + +d.Rec); })
+                .attr('cy', function (d) { return y(+d.PPR); })
+                .attr('r', function (d) { return 15*(+d.PPR/(+d.Att + +d.Rec))*(+d.PPR/(+d.Att + +d.Rec))})
+                .on("mouseover", function (d) {
+                    div.transition()
+                        .duration(200)
+                        .style("opacity", .9);
+                    div.html(d.Player + "<br/>" + d.PPR + "<br/> Rec: " + d.Rec + " Att: " + d.Att)
+                        .style("left", (d3.event.pageX) + "px")
+                        .style("top", (d3.event.pageY - 28) + "px");
+                })
+                .on("mouseout", function (d) {
+                    div.transition()
+                        .duration(500)
+                        .style("opacity", 0);
+                });
+
+
+            d3.select('svg').append('g').attr('transform', 'translate(50,50)')
+                .call(d3.axisLeft(y));
+
+            d3.select('svg').append('g').attr('transform', 'translate(50,480)')
+                .call(d3.axisBottom(x));
+
+        }
+    </script>
+</body>
+
+</html>
