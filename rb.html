@@ -7,6 +7,10 @@
         stroke: black;
     }
 
+    h1 {
+        color: red
+    }
+
     div.tooltip {
         position: absolute;
         text-align: center;
@@ -22,7 +26,9 @@
 </style>
 
 <body onload='init()'>
-    <h1>Running Back Chart</h1>
+    <h1>2021 Running Back Comparison</h1>
+    <h2>Scroll Over Circles to See Details</h2>
+    <p>Size of the circles represents Fantasy Points Per Touch relative to their peers</p>
     <svg width=500 height=500>
     </svg>
     <script>
@@ -31,11 +37,11 @@
             const data = await d3.csv('https://johndaneau22.github.io/johndaneau.github.io/2022NFLFantData.csv');
 
             var x = d3.scaleLinear()
-                .domain([70, 350])
+                .domain([0, 400])
                 .range([0, 450]);
 
             var y = d3.scaleLinear()
-                .domain([80, 380])
+                .domain([0, 400])
                 .range([450, 0]);
 
             var div = d3.select("body").append("div")
@@ -46,10 +52,10 @@
                 .selectAll('circle')
                 .data(data)
                 .enter()
-                .append('circle').filter(function (d) { return (d.FantPos == 'RB' && +d.PosRank < 50)})
+                .append('circle').filter(function (d) { return (d.FantPos == 'RB' && +d.PosRank < 50) })
                 .attr('cx', function (d) { return x(+d.Att + +d.Rec); })
                 .attr('cy', function (d) { return y(+d.PPR); })
-                .attr('r', function (d) { return 15*(+d.PPR/(+d.Att + +d.Rec))*(+d.PPR/(+d.Att + +d.Rec))})
+                .attr('r', function (d) { return 10* (+d.PPR / (+d.Att + +d.Rec)) })
                 .on("mouseover", function (d) {
                     div.transition()
                         .duration(200)
@@ -68,8 +74,20 @@
             d3.select('svg').append('g').attr('transform', 'translate(50,50)')
                 .call(d3.axisLeft(y));
 
-            d3.select('svg').append('g').attr('transform', 'translate(50,480)')
-                .call(d3.axisBottom(x));
+            d3.select('svg').append('g').attr('transform', 'translate(50,470)')
+                .call(d3.axisBottom(x).ticks(6));
+
+            d3.select('svg').append("text")
+                .attr("text-anchor", "end")
+                .attr("x", 300)
+                .attr("y", 500)
+                .text("2021 Touches");
+
+            d3.select('svg').append("text")
+                .attr("text-anchor", "start")
+                .attr("y", 40)
+                .attr("x", 50)
+                .text("2021 Fantasy Points (PPR)")
 
         }
     </script>
