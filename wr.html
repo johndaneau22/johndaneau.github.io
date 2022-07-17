@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
 <script src='https://d3js.org/d3.v5.min.js'></script>
+<script src="https://rawgit.com/susielu/d3-annotation/master/d3-annotation.min.js"></script>
+
 <style>
     circle {
         fill: lightblue;
@@ -23,6 +25,15 @@
         border-radius: 8px;
         pointer-events: none;
     }
+
+    .annotation-note-title {
+        font-weight: bold;
+        font-size: 1em;
+    }
+
+    .annotation-note-label {
+        font-size: .8em;
+    }
 </style>
 
 <body onload='init()'>
@@ -35,6 +46,23 @@
         async function init() {
 
             const data = await d3.csv('https://johndaneau22.github.io/johndaneau.github.io/2022NFLFantData.csv');
+
+            wrs = []
+
+            for (i = 0; i < data.length; i++) {
+                if (data[i].FantPos == 'WR' && +data[i].PosRank < 61) {
+                    data[i].fppt = (+data[i].PPR / (+data[i].Rec + +data[i].Att)).toFixed(2);
+                    wrs.push(data[i]);
+                }
+
+            }
+
+            var colFppt = wrs.map(function (elem) {
+                return +elem.fppt; //to get all the column 2 values
+            });
+
+            var indexMax = colFppt.indexOf(Math.max.apply(this, colFppt));
+            var indexMin = colFppt.indexOf(Math.min.apply(this, colFppt));
 
             var x = d3.scaleLinear()
                 .domain([0, 160])
@@ -50,17 +78,17 @@
 
             d3.select('svg').append('g').attr('transform', 'translate(50,50)')
                 .selectAll('circle')
-                .data(data)
+                .data(wrs)
                 .enter()
-                .append('circle').filter(function (d) { return (d.FantPos == 'WR' && +d.PosRank < 60) })
+                .append('circle')
                 .attr('cx', function (d) { return x(+d.Att + +d.Rec); })
                 .attr('cy', function (d) { return y(+d.PPR); })
-                .attr('r', function (d) { return  4*(+d.PPR / (+d.Att + +d.Rec)) })
+                .attr('r', function (d) { return 4 * d.fppt })
                 .on("mouseover", function (d) {
                     div.transition()
                         .duration(200)
                         .style("opacity", .9);
-                    div.html(d.Player + "<br/>" + d.PPR + "<br/> Rec: " + d.Rec + " Att: " + d.Att)
+                    div.html(d.Player + "<br/>" + "PPR Points: " + d.PPR + "<br/> Rec: " + d.Rec + " Att: " + d.Att + '<br/>' + 'Points Per Touch: ' + d.fppt)
                         .style("left", (d3.event.pageX) + "px")
                         .style("top", (d3.event.pageY - 28) + "px");
                 })
@@ -89,8 +117,43 @@
                 .attr("x", 50)
                 .text("2021 Fantasy Points (PPR)")
 
+            const annotations = [
+                {
+                    note: {
+                        label: "Least efficient Wide Receiver as measured by Points per Touch",
+                        title: wrs[indexMin].Player
+                    },
+                    x: x(+wrs[indexMin].Rec + +wrs[indexMin].Att),
+                    y: y(+wrs[indexMin].PPR),
+                    dy: 10,
+                    dx: 30
+                },
+                {
+                    note: {
+                        label: "Most efficient Wide Receiver as measured by Points per Touch",
+                        title: wrs[indexMax].Player,
+                        align: 'middle'
+                    },
+                    x: x(+wrs[indexMax].Rec + +wrs[indexMax].Att),
+                    y: y(+wrs[indexMax].PPR),
+                    dy: -70,
+                    dx: 0
+                }
+            ]
+
+            // Add annotation to the chart
+            const makeAnnotations = d3.annotation()
+                .annotations(annotations)
+            d3.select("svg")
+                .append("g").attr('transform', 'translate(50,50)')
+                .call(makeAnnotations)
+
         }
     </script>
+     <br>
+     <button type="button"
+         onclick="window.location.href='https://johndaneau22.github.io/johndaneau.github.io/wr.html';">Now Let's See Tight Ends>>
+          </button>
 </body>
 
 </html>
