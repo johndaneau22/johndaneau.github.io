@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<script src='https://d3js.org/d3.v5.min.js'></script>
+<script src="https://cdn.rawgit.com/susielu/d3-annotation/75ff6169/d3-annotation.js"></script>
+
+<style>
+    circle {
+        fill: lightblue;
+        stroke: black;
+    }
+
+    h1 {
+        color: red
+    }
+
+    div.tooltip {
+        position: absolute;
+        text-align: center;
+        width: max-content;
+        height: max-content;
+        padding: 4px;
+        font: 12px sans-serif;
+        background: lightsteelblue;
+        border: 0px;
+        border-radius: 8px;
+        pointer-events: none;
+    }
+
+    .annotation-note-title {
+        font-weight: bold;
+        font-size: 1em;
+    }
+
+    .annotation-note-label {
+        font-size: .8em;
+    }
+
+    .button {
+        border: none;
+        color: rgb(240, 20, 20);
+        padding: 15px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        cursor: pointer;
+    }
+
+</style>
+
+<body onload='init()'>
+    <h1>2022 Wide Receiver Comparison</h1>
+    <h2>Scroll Over Circles to See Details</h2>
+    <p>Size of the circles represents Fantasy Points Per Touch relative to their peers</p>
+    <svg width=500 height=500>
+    </svg>
+    <script>
+        async function init() {
+
+            const data = await d3.csv('https://johndaneau22.github.io/johndaneau.github.io/2023NFLFantData.csv');
+
+            wrs = []
+
+            for (i = 0; i < data.length; i++) {
+                if (data[i].FantPos == 'WR' && +data[i].PosRank < 61) {
+                    data[i].fppt = (+data[i].PPR / (+data[i].Rec + +data[i].Att)).toFixed(2);
+                    wrs.push(data[i]);
+                }
+
+            }
+
+            var colFppt = wrs.map(function (elem) {
+                return +elem.fppt; //to get all the column 2 values
+            });
+
+            var indexMax = colFppt.indexOf(Math.max.apply(this, colFppt));
+            var indexMin = colFppt.indexOf(Math.min.apply(this, colFppt));
+
+            var x = d3.scaleLinear()
+                .domain([0, 160])
+                .range([0, 450]);
+
+            var y = d3.scaleLinear()
+                .domain([0, 450])
+                .range([450, 0]);
+
+            var div = d3.select("body").append("div")
+                .attr("class", "tooltip")
+                .style("opacity", 0);
+
+            d3.select('svg').append('g').attr('transform', 'translate(50,50)')
+                .selectAll('circle')
+                .data(wrs)
+                .enter()
+                .append('circle')
+                .attr('cx', function (d) { return x(+d.Att + +d.Rec); })
+                .attr('cy', function (d) { return y(+d.PPR); })
+                .attr('r', function (d) { return 4 * d.fppt })
+                .on("mouseover", function (d) {
+                    div.transition()
+                        .duration(200)
+                        .style("opacity", .9);
+                    div.html(d.Player + "<br/>" + "PPR Points: " + d.PPR + "<br/> Rec: " + d.Rec + " Att: " + d.Att + '<br/>' + 'Points Per Touch: ' + d.fppt)
+                        .style("left", (d3.event.pageX) + "px")
+                        .style("top", (d3.event.pageY - 28) + "px");
+                })
+                .on("mouseout", function (d) {
+                    div.transition()
+                        .duration(500)
+                        .style("opacity", 0);
+                });
+
+
+            d3.select('svg').append('g').attr('transform', 'translate(50,50)')
+                .call(d3.axisLeft(y));
+
+            d3.select('svg').append('g').attr('transform', 'translate(50,470)')
+                .call(d3.axisBottom(x).ticks(6));
+
+            d3.select('svg').append("text")
+                .attr("text-anchor", "end")
+                .attr("x", 300)
+                .attr("y", 500)
+                .text("2022 Touches");
+
+            d3.select('svg').append("text")
+                .attr("text-anchor", "start")
+                .attr("y", 40)
+                .attr("x", 50)
+                .text("2022 Fantasy Points (PPR)")
+
+            const annotations = [
+                {
+                    note: {
+                        label: "Least efficient Wide Receiver as measured by Points per Touch",
+                        title: wrs[indexMin].Player
+                    },
+                    x: x(+wrs[indexMin].Rec + +wrs[indexMin].Att),
+                    y: y(+wrs[indexMin].PPR),
+                    dy: 10,
+                    dx: 30
+                },
+                {
+                    note: {
+                        label: "Most efficient Wide Receiver as measured by Points per Touch",
+                        title: wrs[indexMax].Player,
+                        align: 'middle'
+                    },
+                    x: x(+wrs[indexMax].Rec + +wrs[indexMax].Att),
+                    y: y(+wrs[indexMax].PPR),
+                    dy: -70,
+                    dx: 0
+                }
+            ]
+
+            // Add annotation to the chart
+            const makeAnnotations = d3.annotation()
+                .annotations(annotations)
+            d3.select("svg")
+                .append("g").attr('transform', 'translate(50,50)')
+                .call(makeAnnotations)
+
+        }
+    </script>
+     <br>
+     <button class="button" type="button"
+         onclick="window.location.href='https://johndaneau22.github.io/johndaneau.github.io/te2022.html';">Now Let's See Tight Ends>>
+          </button>
+</body>
+
+</html>
