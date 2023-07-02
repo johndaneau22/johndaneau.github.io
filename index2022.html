@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<style>
+    .header {
+        padding: 10px;
+        font-size: 40px;
+        text-align: center;
+        background: white;
+    }
+
+    .button {
+        border: none;
+        color: rgb(240, 20, 20);
+        padding: 15px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        cursor: pointer;
+    }
+
+</style>
+
+<div class="header">
+    <h4>CS 416: Data Viz Narrative Visualization </h4>
+    <h4>Fantasy Football Efficiency from 2022</h4>
+    <h5>By: John Daneau</h5>
+</div>
+
+<body>
+    <h1></h1>
+    <p>Each year millions of people play fantasy football.
+        They spend hours looking over data and trying to find any advantage they can over their friends and co-workers. Glory and bragging rights are at stake!</p>
+    <p>Trying to forecast which players will boom and bust for the upcoming season can have you feeling like the Zack Galinfakis meme.</p>
+    <img src="https://c.tenor.com/-uLXT5oNVtMAAAAC/what-forcasting-feels-like-zach-galifianakis.gif">
+    <p>One of the key data points I've used in the past has been an efficiency ratio of Fantasy Points per Touch. As any experienced fantasy player would tell you,
+        touches are key to racking up points. The more opportunity a player gets by getting a rush or getting thrown the ball then the more likely they are to racking
+        up points and helping your fantasy team win. We will see on the following charts that this general trend is true: more touches has a strong correlation to more points.
+    </p>
+    <p>But within that data we can find potentially overlooked players. Most fantasy managers focus on how many points a player had the previous season. But if we
+        want to win in the upcoming season, we need to find players who are going to have breakout seasons. By looking at Fantasy Points per Touch, we can potentially
+        discover overlooked players who perform well with their touches, and if are in better standing with their teams in the upcoming season they may have breakout seasons.
+        Conversely, we can find players who got lots of touches and didn't make as much of them as their peers. These inefficent players may be due for regression for the upcoming season
+        as the coaches may start to limit their opportunities. We may want to avoid these inefficent players.
+    </p>
+    <p>
+        The following charts step through the three primary positions where touches matter: Running Back, Wide Receiver, and Tight End. The charts show a scatterplot of their touches and fantasy points scored.
+        The size of their circles are a visual representation of their Fantasy Points per Touch ratio. The bigger the circle the more efficient. On each chart I've highlighted the Most and Least Efficent Players.
+        You can also hover over the different circles to find out which players lie where and additional details.
+    </p>
+    <br>
+    <button class="button" type="button"
+    onclick="window.location.href='https://johndaneau22.github.io/johndaneau.github.io/rb2022.html';">Let's Start with the Running Backs </button>
+</body>
+
+
+
+</html>
